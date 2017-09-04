@@ -274,7 +274,7 @@ def per_change_bond(workingfiles,change_step):
     
     return output_coordinates
 
-
+print per_change_bond(['CONTCAR','CONTCAR_init'],0.1)[0]
 ####This section does the calculation that we want to do to the POSCAR coordinates####
 ####It returns the values as a nested list, where each sublist is a set of string values####
 

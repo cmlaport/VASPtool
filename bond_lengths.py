@@ -1,18 +1,3 @@
-#--------------------------------------------INTRODUCTION------------------------------------------
-#PROGRAM:  bond_lengths
-#AUTHOR:   Christine LaPorte
-#Revision: Version 0.1.1
-#Date:     6/25/2017
-#
-#About this program: This program calculates the closest neighbors to a selected atom. User inputs
-#VASP POSCAR file, atom of interest, and number of closest neighbors to locate.
-#------------------------------------------SYNTAX--------------------------------------------------
-#
-#-f filename
-#-a atom of interest
-#-n number of atoms near atom a
-#
-#------------------------------------------PROGRAM BODY--------------------------------------------
 import string
 import numpy as np
 import argparse
@@ -49,6 +34,8 @@ if __name__=="__main__":
                     help = 'number of atoms to search for')
 
     args = parser.parse_args()
-#--------------------------------------EXECUTE PROGRAM---------------------------------------------
     print args
+#    print sys.argv    
+#    if len(sys.argv) < 2:
+#        sys.exit("You tried to run grademaster without options. See --help for details.")
     main(args)

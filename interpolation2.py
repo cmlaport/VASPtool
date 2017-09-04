@@ -1,22 +1,7 @@
-#-------------------------------------------Introduction-------------------------------------------
-#
-#PROGRAM: interpolation
-#AUTHOR:  Christine LaPorte
-#DATE:    6/25/2017
-#VERSION: version 0.1.2
-#
-#About this program: This program is designed to calculate intermediate points between two different compound
-# geometries
-#
-#----------------------------------------------SYNTAX----------------------------------------------
-#
-#
-#
-#
-#
-#USAGE: interpolation.py [--p1 POSCAR initial] [--p2 POSCAR final] [--step fraction toward final geometry] [--output(default=POSCAR.out)]
-#
-#----------------------------------------------BODY OF PROGRAM--------------------------------------
+#-------------------------------------------Introduction------------------------------------------------
+
+
+#-------------------------------------------------------------------------------------------------------
 import string
 import numpy as np
 import argparse
@@ -29,7 +14,7 @@ def main(args):
     workingfiles = [args.POSCAR1,args.POSCAR2]
     change_step = args.change_step
     
-    call = VASPlib2.per_change_bond(workingfiles,args.change_step)
+    call = VASPlib2.per_change_bond([workingfiles],args.change_step)
     with open(new_file,'w') as f:
             for i, line in enumerate(VASPlib2.make_file(workingfiles[0]),-7):
                 if i >= 1 and i <= VASPlib2.count_atom(workingfiles[1]):
@@ -44,7 +29,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(usage=usage_str)   
     parser = argparse.ArgumentParser(description='read the files')
 
-    parser.add_argument('--p1',  
+    parser.add_argument('--p1', 
                         dest='POSCAR1', 
                         type = str, 
                         default=None, 
@@ -65,11 +50,12 @@ if __name__=="__main__":
     parser.add_argument('--output',
                     dest='new_file',
                     type = str,
-                    default='POSCAR.out',
+                    default=None,
                     help = 'name of file to output results to')
 
     args = parser.parse_args()
     print args
-#
-#-----------------------------------EXECUTE PROGRAM-------------------------------------------------    
+#    print sys.argv    
+#    if len(sys.argv) < 2:
+#        sys.exit("You tried to run grademaster without options. See --help for details.")
     main(args)

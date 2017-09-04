@@ -1,20 +1,16 @@
 #-------------------------------------------Introduction------------------------------------------------
-PROGRAM      = 'polaronmaker'
-AUTHOR       =  "Christine LaPorte"
-VERSION      = 'v0.0.2'
-VERSION DATE = '6/16/2017'
-
-#About this program:
-#In small polaron modeling, we see a distortion in the crystal lattice structure around a small area
-#such as around a single atom in the structure.
-
-#This program is designed to simulate a polaron using given vectors/coordinates in a VASP POSCAR file.
-#This version assumes fractional coordinates.
-
-
-
-#------------------------------------------SYNTAX------------------------------------------------------
-
+#In polaron modeling, we see a change in the bond lengths within a cystal structure when a charge is
+# placed on an atom. We can use this idea to move an electron or hole from one atom to another in a 
+# crystal.
+#This is used in ab initio methods to determine charge mobility
+#Here we use python to help model this behavior.
+#We define simple functions to help us manipulate the position_vector file.
+#This program is set up to use the POSCAR file in VASP.
+#This program can manipulate the bond length of neighboring atoms around a central atom. This will create
+# a new file with the adjusted structure so that we can move our hole or electron to or from that atom.
+#This code is also designed to perform a linear interpolation between a initial and final state structure:
+# This function requires initial state and final state position vector files
+# The output file is a state inbetween the initial and final state.
 #-------------------------------------------------------------------------------------------------------
 import os
 import math
@@ -65,22 +61,20 @@ def polaroncalc(poscar_file,alpha,neighboring_ions,atom_serial_number, destinati
     return destination_file
 
 def main (args):
-    poscar_file = args.POSCAR
+    poscar_file = args.poscar
     site_num = args.atom_serial_number
-    newfile = args.new_file
+    newfile = args.newfile
     coordinates = args.coordinates
     final_site = args.atom_final_site
     
     neighbors = VASPlib2.per_neighbor_finder(poscar_file,site_num,coordinates)
     neighborlist = neighbors.keys()
-    print site_num, neighborlist
-    polaroncalc(poscar_file,args.alpha,neighborlist,site_num,newfile)
+    polaroncalc(poscar_file,args.alpha,site_num,newfile)
 
     if final_site != None:
         neighbors = VASPlib2.per_neighbor_finder(poscar_file,final_site,coordinates)
         neighborlist = neighbors.keys()
-        print final_site,neighborlist
-        polaroncalc(newfile,args.beta,neighborlist,final_site,newfile)
+        polaroncalc(newfile,args.beta,final_site,newfile)
 
 if __name__=="__main__":  
     usage_str = "usage: %prog [options] arg"
@@ -92,37 +86,37 @@ if __name__=="__main__":
                         dest='POSCAR', 
                         type = str, 
                         default=None, 
-                        help="Specifies the position card file. Must be in fractional coordinates")
+                        help='Specifies the position card file')
     
     parser.add_argument('--alpha', '-a',
                         dest='alpha',
                         type = float,
                         default=0.95, 
-                        help="Specifies how the bond length will change, where 1 = no change")
+                        help='Specifies a fraction that bonds will shrink by')
     
     parser.add_argument('--beta', '-b',
                         dest='beta',
                         type = float ,
                         default=1.05,
-                        help = "Specifies the fraction that secondary atom bonds change, where 1 = no change")
+                        help = 'Specifies the fraction that bonds will grow by')
     
-    parser.add_argument('--atom', '-o',
+    parser.add_argument('--atom_initial', '-o',
                         dest='atom_serial_number',
                         type = int ,
                         default=1,
-                        help = "Site where the defect occurs, specified by the atom's serial number")
+                        help = 'Initial defect site')
     
-    parser.add_argument('--atom2', '-f',
+    parser.add_argument('--atom_final', '-f',
                         dest='atom_final_site',
                         type = int ,
                         default=None,
-                        help = "Secondary defect site, specified by the atom's serial number")
+                        help = 'Final defect site')
  
     parser.add_argument('--coordinates', '-c',
                         dest='coordinates',
                         type = int ,
                         default=4,
-                        help = 'The number of bonds around the central atom of interest. This is manually input into the program')
+                        help = 'Final defect site')
         
     parser.add_argument('--output',
                     dest='new_file',

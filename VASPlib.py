@@ -18,6 +18,13 @@ import heapq #for sorting
 import math
 import argparse
 #--------------------Part 1: Creating a file for an electron/hole transfer------------------------------
+def read_poscar(poscar_file):
+    
+    with open(poscar_file,'r') as f:
+        get_all=f.readlines()
+    
+    return get_all
+
 
 ####Use distance formula to find the nearest neighbors.####
 ####Verify coordinates with Vesta, Avogadro or other structure modeling software####
@@ -102,7 +109,32 @@ def count_atom(inputfile):
                 total=total+atom_count[count]
                 count = count +1
             return total
-  
+
+def periodicity(workingfiles):
+
+    initial_state=get_vector(str(workingfiles[0]))
+    initial_state= np.array(initial_state)
+    final_state=get_vector(str(workingfiles[1]))
+    final_state=np.array(final_state)
+    output_coordinates = np.copy(initial_state)
+    
+    for n,lst in enumerate(output_coordinates):
+        for i in range(len(lst)):
+            check = lst[i] - final_state[n][i]
+
+            if check > -0.5 and check < 0.5:
+                lst[i] = format(lst[i],'.16f')
+            elif check > 0.5:
+
+                lst[i] = 1 - lst[i]
+                lst[i] = format(lst[i],'.16f')
+            else:
+
+                lst[i] = lst[i] + 1
+                lst[i] = format(lst[i],'.16f')
+    return output_coordinates    
+
+     
     
 ####this section reads intial and final position of atoms from the initial and final state 
 # position vector files####
@@ -214,7 +246,6 @@ def per_neighbor_finder(poscar_file, atom_serial_number,coordination_number):
             del neighbor_table[key]
     return neighbor_table
 
-#for two files
 def periodicity_check(workingfiles):
 
     initial_state=get_vector(str(workingfiles[0]))
@@ -238,28 +269,18 @@ def periodicity_check(workingfiles):
                
     return output_coordinates    
 
+####This section does the calculation that we want to do to the POSCAR coordinates####
+####It returns the values as a nested list, where each sublist is a set of string values####
+def change_bond(workingfiles,change_step):
 ####workingfiles: initial and final state position vector files. Usually a list of two files####
 ####changestep: a number between 0 and 1, where 0 is the initial state and 1 is the final state position####
-def per_change_bond(workingfiles,change_step):
-####workingfiles: initial and final state position vector files. Usually a list of two files####
-####changestep: a number between 0 and 1, where 0 is the initial state and 1 is the final state position####
+    import numpy as np
     output_coordinates=[]
     initial_state=get_vector(str(workingfiles[0]))
     initial_state= np.array(initial_state)
     final_state=get_vector(str(workingfiles[1]))
     final_state=np.array(final_state)
-    periodic_check = np.copy(final_state)
-    for n,lst in enumerate(final_state):
-        for i in range(len(lst)):
-            periodic_check = lst[i] - initial_state[n][i]
-    final_p = periodic_boundary(periodic_check)
-    
-    
-    output_position=((1-change_step)*initial_state+final_p*change_step)
-    if periodic_check > 0.5:
-        output_position = output_position + 1
-    if periodic_check < -0.5:
-        output_position = output_position -1
+    output_position=((1-change_step)*initial_state+final_state*change_step)
     output_position=output_position.tolist()
     for lst in output_position:
         for i in range(len(lst)):
@@ -274,7 +295,6 @@ def per_change_bond(workingfiles,change_step):
     
     return output_coordinates
 
-print per_neighbor_finder('init_POSCAR_V',1,6)
 ####This section does the calculation that we want to do to the POSCAR coordinates####
 ####It returns the values as a nested list, where each sublist is a set of string values####
 
@@ -282,16 +302,17 @@ print per_neighbor_finder('init_POSCAR_V',1,6)
 ####write file creates a new file with the changes from change bond####
 ####writing to files is file by file because the user will likely want to change file paths
 # and file names####
-#def interpolation(new_file, workingfiles, change_step):
+def interpolation(new_file, workingfiles, change_step):
 ####new_file: file name for the output file####
 ####workingfiles: initial and final state position vector files. Usually a list of two files#### 
 ####change_step:  a number between 0 and 1, where 0 is the initial state and 1 is the final state position####
-#    call=per_change_bond(workingfiles,change_step)
-#    with open(new_file,'w') as f:
-#            for i, line in enumerate(make_file(workingfiles[0]),-7):
-#                if i >= 1 and i <= count_atom(workingfiles[0]):
-#                    f.writelines('  ' + call[i-1] + '\n')
-#                else:
-#                    f.writelines(line)
-#    return new_file
+    call=change_bond(workingfiles,change_step)
+    with open(new_file,'w') as f:
+            for i, line in enumerate(make_file(workingfiles[0]),-7):
+                if i >= 1 and i <= count_atom(workingfiles[0]):
+                    f.writelines('  ' + call[i-1] + '\n')
+                else:
+                    f.writelines(line)
+    return new_file
 
+print per_neighbor_finder('new.out',4,4)
